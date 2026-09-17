@@ -11,7 +11,7 @@ const state = {
   currentView: 'home',
   selectedDistrictId: null,
   selectedPlaceId: null,
-  savedPlaceIds: JSON.parse(localStorage.getItem('chonburi_saved_places') || '[]'),
+  savedPlaceIds: readSavedPlaceIds(),
   searchQuery: '',
   theme: localStorage.getItem('chonburi_theme') || 'light',
   lang: localStorage.getItem('chonburi_lang') || 'th',
@@ -24,6 +24,15 @@ const state = {
     interests: ['sea', 'cafe', 'restaurant', 'photo']
   }
 };
+
+function readSavedPlaceIds() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('chonburi_saved_places') || '[]');
+    return Array.isArray(saved) ? saved.filter(id => typeof id === 'string') : [];
+  } catch {
+    return [];
+  }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   applyTheme();
@@ -40,6 +49,7 @@ function applyTheme() {
 
 function initApp() {
   renderNavbar();
+  applyStaticTranslations();
   handleHashChange();
   window.addEventListener('hashchange', handleHashChange);
   updateBottomNav();
@@ -54,7 +64,9 @@ function renderNavbar() {
     (targetView) => navigateTo(targetView),
     (query) => {
       state.searchQuery = query;
-      if (state.currentView === 'home' || state.currentView === 'districts') {
+      if (state.currentView === 'map') {
+        renderCurrentView();
+      } else if (state.currentView === 'home' || state.currentView === 'districts') {
         renderCurrentView();
       }
     },
@@ -79,8 +91,51 @@ function toggleLang() {
   state.lang = state.lang === 'th' ? 'en' : 'th';
   localStorage.setItem('chonburi_lang', state.lang);
   renderNavbar();
+  applyStaticTranslations();
   updateBottomNav();
   renderCurrentView();
+}
+
+function applyStaticTranslations() {
+  const translations = {
+    'footer-description': t('footerDescription'),
+    'footer-links-title': t('footerExploreTitle'),
+    'footer-categories-title': t('footerCategoriesTitle'),
+    'footer-districts-title': t('footerDistrictsTitle'),
+    'footer-about-link': t('footerAbout'),
+    'footer-districts-link': t('footerDistricts'),
+    'footer-map-link': t('footerMap'),
+    'footer-planner-link': t('footerPlanner'),
+    'footer-eat-link': t('footerEat'),
+    'footer-hotels-link': t('footerHotels'),
+    'footer-photo-link': t('footerPhotos'),
+    'footer-copyright': t('footerCopyright')
+  };
+
+  Object.entries(translations).forEach(([id, value]) => {
+    const element = document.getElementById(id);
+    if (element) element.textContent = value;
+  });
+
+  document.documentElement.lang = state.lang;
+  document.title = state.lang === 'en'
+    ? 'CHONBURI - More Than The Sea | Chonburi Travel Guide'
+    : 'CHONBURI - More Than The Sea | ท่องเที่ยวจังหวัดชลบุรี 11 อำเภอ';
+  const description = document.querySelector('meta[name="description"]');
+  if (description) {
+    description.content = state.lang === 'en'
+      ? 'Discover Chonburi across 11 districts, beaches, cafes, nature, restaurants, hotels, photo spots, and local history.'
+      : 'ค้นพบจังหวัดชลบุรีผ่าน 11 อำเภอ ทะเล คาเฟ่ ธรรมชาติ ร้านอาหาร ที่พัก จุดถ่ายรูป และประวัติความเป็นมาของจังหวัดชลบุรี';
+  }
+}
+
+function placeName(place) {
+  return state.lang === 'en' ? (place.nameEn || place.nameTh) : place.nameTh;
+}
+
+function districtName(district) {
+  if (!district) return state.lang === 'en' ? 'Chonburi' : 'ชลบุรี';
+  return state.lang === 'en' ? (district.nameEn || 'Chonburi') : district.nameTh;
 }
 
 function updateBottomNav() {
@@ -105,7 +160,8 @@ function handleHashChange() {
     state.selectedPlaceId = pid;
     state.currentView = 'place-detail';
   } else {
-    state.currentView = hash;
+    const validViews = new Set(['home', 'about', 'districts', 'map', 'hotels', 'eat-drink', 'photo-spots', 'trip-planner', 'saved']);
+    state.currentView = validViews.has(hash) ? hash : 'home';
   }
   renderCurrentView();
   updateBottomNav();
@@ -342,19 +398,19 @@ function createHomeView() {
 
         <!-- Quick Category Tags -->
         <div class="flex flex-wrap items-center justify-center gap-2 mt-6">
-          <button data-category="sea" class="quick-cat-btn px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-medium backdrop-blur-sm border border-white/20 transition-all">
+          <button type="button" data-category="sea" class="quick-cat-btn px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-medium backdrop-blur-sm border border-white/20 transition-all">
             ${t('catSea')}
           </button>
-          <button data-category="nature" class="quick-cat-btn px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-medium backdrop-blur-sm border border-white/20 transition-all">
+          <button type="button" data-category="nature" class="quick-cat-btn px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-medium backdrop-blur-sm border border-white/20 transition-all">
             ${t('catNature')}
           </button>
-          <button data-category="cafe" class="quick-cat-btn px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-medium backdrop-blur-sm border border-white/20 transition-all">
+          <button type="button" data-category="cafe" class="quick-cat-btn px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-medium backdrop-blur-sm border border-white/20 transition-all">
             ${t('catCafe')}
           </button>
-          <button data-category="restaurant" class="quick-cat-btn px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-medium backdrop-blur-sm border border-white/20 transition-all">
+          <button type="button" data-category="restaurant" class="quick-cat-btn px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-medium backdrop-blur-sm border border-white/20 transition-all">
             ${t('catRestaurant')}
           </button>
-          <button data-category="hotel" class="quick-cat-btn px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-medium backdrop-blur-sm border border-white/20 transition-all">
+          <button type="button" data-category="hotel" class="quick-cat-btn px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-medium backdrop-blur-sm border border-white/20 transition-all">
             ${t('catHotel')}
           </button>
         </div>
@@ -447,12 +503,12 @@ function createHomeView() {
                       <i data-lucide="heart" class="w-4 h-4 ${state.savedPlaceIds.includes(p.id) ? 'fill-red-500 text-red-500' : ''}"></i>
                     </button>
                     <span class="absolute bottom-3 left-3 bg-[#006B9E] text-white px-2.5 py-1 rounded-lg text-xs font-semibold">
-                      ${districtObj ? (state.lang === 'en' ? districtObj.nameEn : districtObj.nameTh) : 'ชลบุรี'}
+                      ${districtName(districtObj)}
                     </span>
                   </div>
                   <div class="p-5">
                     <div class="flex items-center justify-between mb-1">
-                      <h3 class="font-bold text-base text-[#172B3A] dark:text-white group-hover:text-[#006B9E] dark:group-hover:text-[#00A8C6] transition-colors">${p.nameTh}</h3>
+                      <h3 class="font-bold text-base text-[#172B3A] dark:text-white group-hover:text-[#006B9E] dark:group-hover:text-[#00A8C6] transition-colors">${placeName(p)}</h3>
                       <div class="flex items-center gap-1 text-xs font-bold text-amber-500">
                         <i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400"></i> ${p.rating}
                       </div>
@@ -488,7 +544,7 @@ function createHomeView() {
   setTimeout(() => {
     initInteractiveMap('home-map-preview', PLACES.slice(0, 10), (placeId) => {
       navigateTo('place-detail', placeId);
-    });
+    }, state.lang);
   }, 100);
 
   const heroSearchBtn = container.querySelector('#hero-search-btn');
@@ -502,6 +558,18 @@ function createHomeView() {
       }
     });
   }
+
+  container.addEventListener('click', (event) => {
+    const button = event.target.closest('.quick-cat-btn');
+    if (!button) return;
+    event.preventDefault();
+    const category = button.getAttribute('data-category');
+    if (!category) return;
+    state.searchQuery = '';
+    state.mapFilter.districts = [];
+    state.mapFilter.categories = [category];
+    navigateTo('map');
+  });
 
   const readAboutBtn = container.querySelector('#home-read-about-btn');
   if (readAboutBtn) {
@@ -520,6 +588,19 @@ function createHomeView() {
       if (e.target.closest('.bookmark-btn')) return;
       const pid = card.getAttribute('data-place-id');
       navigateTo('place-detail', pid);
+    });
+  });
+
+  container.querySelectorAll('[data-bookmark-id]').forEach(button => {
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleBookmark(button.getAttribute('data-bookmark-id'));
+      const icon = button.querySelector('[data-lucide="heart"]');
+      const isSaved = state.savedPlaceIds.includes(button.getAttribute('data-bookmark-id'));
+      if (icon) {
+        icon.classList.toggle('fill-red-500', isSaved);
+        icon.classList.toggle('text-red-500', isSaved);
+      }
     });
   });
 
@@ -632,7 +713,7 @@ function createDistrictDetailView(districtId) {
 
     <!-- District Places Grid -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-      <h2 class="text-2xl font-bold text-[#172B3A] dark:text-white">Places in ${state.lang === 'en' ? district.nameEn : district.nameTh} (${districtPlaces.length})</h2>
+      <h2 class="text-2xl font-bold text-[#172B3A] dark:text-white">${state.lang === 'en' ? 'Places in' : 'สถานที่ท่องเที่ยวใน'} ${state.lang === 'en' ? district.nameEn : district.nameTh} (${districtPlaces.length})</h2>
       
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         ${districtPlaces.map(p => `
@@ -645,7 +726,7 @@ function createDistrictDetailView(districtId) {
                 </span>
               </div>
               <div class="p-5">
-                <h3 class="font-bold text-base text-[#172B3A] dark:text-white group-hover:text-[#006B9E] dark:group-hover:text-[#00A8C6] transition-colors">${p.nameTh}</h3>
+                <h3 class="font-bold text-base text-[#172B3A] dark:text-white group-hover:text-[#006B9E] dark:group-hover:text-[#00A8C6] transition-colors">${placeName(p)}</h3>
                 <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1 mb-3">${p.address}</p>
               </div>
             </div>
@@ -679,7 +760,7 @@ function createDistrictDetailView(districtId) {
    ========================================================================== */
 function createMapView() {
   const container = document.createElement('div');
-  container.className = 'flex flex-col lg:flex-row h-[calc(100vh-80px)] overflow-hidden';
+  container.className = 'mobile-map-layout flex flex-col lg:flex-row h-[calc(100vh-80px)] overflow-hidden';
 
   container.innerHTML = `
     <!-- Sidebar Filter -->
@@ -773,13 +854,13 @@ function createMapView() {
   setTimeout(() => {
     initInteractiveMap('full-interactive-map', getFilteredPlaces(), (placeId) => {
       navigateTo('place-detail', placeId);
-    });
+    }, state.lang);
   }, 100);
 
   const updateMap = () => {
     renderMapMarkers(getFilteredPlaces(), (placeId) => {
       navigateTo('place-detail', placeId);
-    });
+    }, state.lang);
   };
 
   const mapSearchInput = container.querySelector('#map-search-input');
@@ -850,7 +931,7 @@ function createPlaceDetailView(placeId) {
       <div class="absolute inset-0 bg-gradient-to-t from-[#172B3A] via-transparent to-transparent"></div>
       <div class="absolute bottom-6 left-6 right-6 text-white">
         <span class="bg-[#00A8C6] text-white px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider">
-          ${districtObj ? (state.lang === 'en' ? districtObj.nameEn : districtObj.nameTh) : 'ชลบุรี'}
+          ${districtName(districtObj)}
         </span>
         <h1 class="text-3xl sm:text-5xl font-black mt-2">${place.nameTh}</h1>
         <p class="text-cyan-100 text-sm sm:text-base mt-1">${place.subcategory || place.category}</p>
@@ -866,7 +947,7 @@ function createPlaceDetailView(placeId) {
             <i data-lucide="star" class="w-5 h-5 fill-amber-400"></i> ${place.rating}
           </div>
           <span class="text-slate-300">•</span>
-          <span class="text-slate-500 text-sm">${place.reviewsCount || 200}+ reviews</span>
+          <span class="text-slate-500 text-sm">${place.reviewsCount || 200}+ ${state.lang === 'en' ? 'reviews' : 'รีวิว'}</span>
         </div>
 
         <div>
@@ -882,14 +963,14 @@ function createPlaceDetailView(placeId) {
               <i data-lucide="clock" class="w-4 h-4 text-[#006B9E] dark:text-[#00A8C6] shrink-0 mt-0.5"></i>
               <div>
                 <span class="font-bold block text-slate-700 dark:text-slate-200">${t('placeOpenHours')}</span>
-                <span class="text-slate-500 dark:text-slate-400">${place.openHours || '08:00 - 18:00'}</span>
+                <span class="text-slate-500 dark:text-slate-400">${place.openHours || (state.lang === 'en' ? '08:00 - 18:00' : '08:00 - 18:00 น.')}</span>
               </div>
             </div>
             <div class="flex items-start gap-3">
               <i data-lucide="ticket" class="w-4 h-4 text-[#006B9E] dark:text-[#00A8C6] shrink-0 mt-0.5"></i>
               <div>
                 <span class="font-bold block text-slate-700 dark:text-slate-200">${t('placeEntranceFee')}</span>
-                <span class="text-slate-500 dark:text-slate-400">${place.entranceFee || 'Free'}</span>
+                <span class="text-slate-500 dark:text-slate-400">${place.entranceFee || (state.lang === 'en' ? 'Free' : 'เข้าชมฟรี')}</span>
               </div>
             </div>
           </div>
@@ -900,7 +981,7 @@ function createPlaceDetailView(placeId) {
       <div class="space-y-6">
         <div class="bg-white dark:bg-[#1E293B] p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md space-y-4">
           <h4 class="font-bold text-base text-[#172B3A] dark:text-white flex items-center gap-2">
-            <i data-lucide="map-pin" class="w-5 h-5 text-[#006B9E] dark:text-[#00A8C6]"></i> Location
+            <i data-lucide="map-pin" class="w-5 h-5 text-[#006B9E] dark:text-[#00A8C6]"></i> ${t('locationTitle')}
           </h4>
           <p class="text-xs text-slate-600 dark:text-slate-400">${place.address}</p>
           
@@ -915,7 +996,7 @@ function createPlaceDetailView(placeId) {
   `;
 
   setTimeout(() => {
-    initInteractiveMap('place-mini-map', [place], null);
+    initInteractiveMap('place-mini-map', [place], null, state.lang);
   }, 100);
 
   const backBtn = container.querySelector('#back-from-place-btn');
@@ -947,7 +1028,7 @@ function createHotelsView() {
     <div class="text-center max-w-2xl mx-auto space-y-2">
       <span class="text-[#00A8C6] font-bold text-xs uppercase tracking-wider">WHERE TO STAY</span>
       <h1 class="text-3xl font-extrabold text-[#172B3A] dark:text-white">${t('navHotels')}</h1>
-      <p class="text-slate-500 dark:text-slate-400 text-sm">คัดสรรที่พักคุณภาพ ครอบคลุมทั้ง 11 อำเภอของจังหวัดชลบุรี</p>
+      <p class="text-slate-500 dark:text-slate-400 text-sm">${state.lang === 'en' ? 'Curated stays across all 11 districts of Chonburi.' : 'คัดสรรที่พักคุณภาพ ครอบคลุมทั้ง 11 อำเภอของจังหวัดชลบุรี'}</p>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -959,14 +1040,14 @@ function createHotelsView() {
               <div class="relative h-52 overflow-hidden">
                 <img src="${h.cover}" alt="${h.nameTh}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                 <span class="absolute top-3 left-3 bg-[#006B9E] text-white px-2.5 py-1 rounded-lg text-xs font-semibold">
-                  📍 ${districtObj ? (state.lang === 'en' ? districtObj.nameEn : districtObj.nameTh) : 'ชลบุรี'}
+                  📍 ${districtName(districtObj)}
                 </span>
                 <span class="absolute top-3 right-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-2 py-1 rounded-lg text-xs font-bold text-amber-500">
                   ★ ${h.rating}
                 </span>
               </div>
               <div class="p-5">
-                <h3 class="font-bold text-lg text-[#172B3A] dark:text-white mb-1">${h.nameTh}</h3>
+                <h3 class="font-bold text-lg text-[#172B3A] dark:text-white mb-1">${placeName(h)}</h3>
                 <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mb-4">${h.address}</p>
               </div>
             </div>
@@ -1003,7 +1084,7 @@ function createEatDrinkView() {
     <div class="text-center max-w-2xl mx-auto space-y-2">
       <span class="text-[#F4B942] font-bold text-xs uppercase tracking-wider">EAT & DRINK</span>
       <h1 class="text-3xl font-extrabold text-[#172B3A] dark:text-white">${t('navEatDrink')}</h1>
-      <p class="text-slate-500 dark:text-slate-400 text-sm">ลิ้มรสร้านอาหารอร่อย ร้านอาหารทะเล และคาเฟ่ถ่ายรูปสวยทั้ง 11 อำเภอ</p>
+      <p class="text-slate-500 dark:text-slate-400 text-sm">${state.lang === 'en' ? 'Discover local restaurants, seafood, and photogenic cafes across all 11 districts.' : 'ลิ้มรสร้านอาหารอร่อย ร้านอาหารทะเล และคาเฟ่ถ่ายรูปสวยทั้ง 11 อำเภอ'}</p>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1022,8 +1103,8 @@ function createEatDrinkView() {
                 </span>
               </div>
               <div class="p-5">
-                <h3 class="font-bold text-base text-[#172B3A] dark:text-white">${p.nameTh}</h3>
-                <p class="text-xs text-slate-400 font-medium mb-2">📍 ${districtObj ? (state.lang === 'en' ? districtObj.nameEn : districtObj.nameTh) : 'ชลบุรี'}</p>
+                <h3 class="font-bold text-base text-[#172B3A] dark:text-white">${placeName(p)}</h3>
+                <p class="text-xs text-slate-400 font-medium mb-2">📍 ${districtName(districtObj)}</p>
                 <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mb-3">${p.address}</p>
               </div>
             </div>
@@ -1056,7 +1137,7 @@ function createPhotoSpotsView() {
     <div class="text-center max-w-2xl mx-auto space-y-2">
       <span class="text-[#00A8C6] font-bold text-xs uppercase tracking-wider">📸 PHOTO SPOTS</span>
       <h1 class="text-3xl font-extrabold text-[#172B3A] dark:text-white">${t('navPhotoSpots')}</h1>
-      <p class="text-slate-500 dark:text-slate-400 text-sm">“มุมไหนของชลบุรีที่คุณอยากเก็บไว้ในความทรงจำ?”</p>
+      <p class="text-slate-500 dark:text-slate-400 text-sm">${state.lang === 'en' ? 'Which corner of Chonburi will you keep in your memories?' : '“มุมไหนของชลบุรีที่คุณอยากเก็บไว้ในความทรงจำ?”'}</p>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1069,7 +1150,7 @@ function createPhotoSpotsView() {
             
             <div class="absolute top-4 left-4">
               <span class="bg-white/20 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full">
-                📍 ${districtObj ? (state.lang === 'en' ? districtObj.nameEn : districtObj.nameTh) : 'ชลบุรี'}
+                📍 ${districtName(districtObj)}
               </span>
             </div>
 
@@ -1164,11 +1245,11 @@ function createTripPlannerView() {
     const outputContainer = container.querySelector('#itinerary-output');
     if (!outputContainer) return;
 
-    const itinerary = generateTripItinerary(state.plannerConfig.days, state.plannerConfig.interests);
+    const itinerary = generateTripItinerary(state.plannerConfig.days, state.plannerConfig.interests, state.lang);
 
     outputContainer.innerHTML = `
       <div class="flex items-center justify-between">
-        <h2 class="text-2xl font-extrabold text-[#172B3A] dark:text-white">${t('plannerRecommendedTitle')} (${state.plannerConfig.days} Days)</h2>
+        <h2 class="text-2xl font-extrabold text-[#172B3A] dark:text-white">${t('plannerRecommendedTitle')} (${state.plannerConfig.days} ${state.lang === 'en' ? 'Days' : 'วัน'})</h2>
       </div>
 
       ${itinerary.map(day => `
@@ -1179,14 +1260,14 @@ function createTripPlannerView() {
 
           <div class="space-y-6 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:bg-cyan-100 dark:before:bg-slate-700">
             ${day.schedule.map(slot => `
-              <div class="relative flex items-start gap-4 pl-8">
+              <div class="planner-slot relative flex items-start gap-4 pl-8">
                 <div class="absolute left-1.5 top-1.5 w-4 h-4 rounded-full bg-[#00A8C6] border-2 border-white dark:border-slate-800"></div>
                 <div class="shrink-0 w-20 text-xs font-bold text-[#006B9E] dark:text-[#00A8C6] pt-0.5">${slot.time}</div>
                 <div class="flex-1 bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row gap-4 items-center">
                   <img src="${slot.place.cover}" alt="${slot.place.nameTh}" class="w-full sm:w-28 h-20 object-cover rounded-xl shrink-0">
                   <div class="flex-1 text-left">
                     <span class="text-[10px] font-bold text-[#00A8C6] uppercase">📍 ${slot.districtName}</span>
-                    <h4 class="font-bold text-sm text-[#172B3A] dark:text-white">${slot.place.nameTh}</h4>
+                    <h4 class="font-bold text-sm text-[#172B3A] dark:text-white">${placeName(slot.place)}</h4>
                     <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">${slot.place.address}</p>
                   </div>
                   <button data-planner-place="${slot.place.id}" class="view-place-btn text-xs font-bold text-[#006B9E] dark:text-[#00A8C6] hover:underline shrink-0">
@@ -1250,9 +1331,9 @@ function createSavedView() {
     ${savedPlaces.length === 0 ? `
       <div class="text-center py-16 bg-white dark:bg-[#1E293B] rounded-3xl border border-slate-100 dark:border-slate-800 p-8 space-y-4">
         <i data-lucide="heart" class="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto"></i>
-        <h3 class="text-lg font-bold text-slate-700 dark:text-slate-200">No saved places yet</h3>
+        <h3 class="text-lg font-bold text-slate-700 dark:text-slate-200">${t('noSavedTitle')}</h3>
         <button id="saved-explore-btn" class="px-6 py-2.5 bg-[#006B9E] text-white font-bold text-xs rounded-xl shadow-md">
-          Explore Places
+          ${t('exploreBtn')}
         </button>
       </div>
     ` : `
@@ -1269,8 +1350,8 @@ function createSavedView() {
                   </button>
                 </div>
                 <div class="p-4">
-                  <span class="text-[10px] font-bold text-[#00A8C6] uppercase">📍 ${districtObj ? (state.lang === 'en' ? districtObj.nameEn : districtObj.nameTh) : 'ชลบุรี'}</span>
-                  <h3 class="font-bold text-base text-[#172B3A] dark:text-white">${p.nameTh}</h3>
+                  <span class="text-[10px] font-bold text-[#00A8C6] uppercase">📍 ${districtName(districtObj)}</span>
+                  <h3 class="font-bold text-base text-[#172B3A] dark:text-white">${placeName(p)}</h3>
                   <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">${p.address}</p>
                 </div>
               </div>
@@ -1307,6 +1388,8 @@ function createSavedView() {
 }
 
 function toggleBookmark(placeId) {
+  if (!PLACES.some(place => place.id === placeId)) return;
+
   const index = state.savedPlaceIds.indexOf(placeId);
   if (index >= 0) {
     state.savedPlaceIds.splice(index, 1);

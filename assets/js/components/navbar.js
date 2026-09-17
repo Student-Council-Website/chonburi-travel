@@ -202,6 +202,12 @@ export function createNavbar(onNavigate, onSearch, currentLang = 'th', currentTh
   const searchInput = header.querySelector("#header-search-input");
   if (searchInput && onSearch) {
     searchInput.addEventListener("input", (e) => onSearch(e.target.value));
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        onNavigate("map");
+      }
+    });
   }
 
   return header;

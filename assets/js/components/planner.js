@@ -3,9 +3,11 @@ import { DISTRICTS } from '../data/districts.js';
 
 export function generateTripItinerary(days = 2, selectedInterests = ['sea', 'cafe', 'restaurant', 'photo'], lang = 'th') {
   const isEn = lang === 'en';
-  let availablePlaces = PLACES.filter(p => selectedInterests.includes(p.category) || p.isTrending);
+  const safeDays = Number.isInteger(days) ? Math.min(Math.max(days, 1), 4) : 2;
+  const interests = Array.isArray(selectedInterests) ? selectedInterests : [];
+  let availablePlaces = PLACES.filter(p => interests.includes(p.category) || p.isTrending);
 
-  if (availablePlaces.length < days * 4) {
+  if (availablePlaces.length < safeDays * 4) {
     availablePlaces = [...PLACES];
   }
 
@@ -35,7 +37,7 @@ export function generateTripItinerary(days = 2, selectedInterests = ['sea', 'caf
     ["phanatnikhom", "banbueng", "kohchan"]
   ];
 
-  for (let d = 1; d <= days; d++) {
+  for (let d = 1; d <= safeDays; d++) {
     const dayDistricts = districtFocusList[(d - 1) % districtFocusList.length];
     const dayItems = [];
 

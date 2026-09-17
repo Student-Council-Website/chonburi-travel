@@ -115,6 +115,18 @@ export const i18n = {
     noSavedTitle: "ยังไม่มีสถานที่ที่บันทึกไว้",
     noSavedSubtitle: "กดไอคอนหัวใจที่การ์ดสถานที่เพื่อบันทึกไว้ดูภายหลัง",
     exploreBtn: "สำรวจสถานที่ท่องเที่ยว"
+    ,footerExploreTitle: "การสำรวจชลบุรี"
+    ,footerCategoriesTitle: "หมวดหมู่แนะนำ"
+    ,footerDistrictsTitle: "11 อำเภอชลบุรี"
+    ,footerAbout: "🏛️ ประวัติจังหวัดชลบุรี"
+    ,footerDistricts: "สำรวจ 11 อำเภอ"
+    ,footerMap: "แผนที่ท่องเที่ยว Interactive"
+    ,footerPlanner: "ออกแบบทริปอัจฉริยะ (Plan Your Trip)"
+    ,footerEat: "กิน & ดื่ม (ร้านอาหาร / คาเฟ่)"
+    ,footerHotels: "ที่พัก & รีสอร์ทติดทะเล"
+    ,footerPhotos: "📸 Photo Spots ถ่ายรูปสวย"
+    ,footerDescription: "ระบบค้นพบจังหวัดชลบุรี — ครอบคลุมเรื่องราว แผนที่ สถานที่ท่องเที่ยว คาเฟ่ ร้านอาหาร ที่พัก และการจัดทริปใน 11 อำเภอ"
+    ,footerCopyright: "© 2026 CHONBURI — More Than The Sea. Designed with Modern Tourism + Local Discovery."
   },
   en: {
     // Navigation & General
@@ -232,5 +244,17 @@ export const i18n = {
     noSavedTitle: "No saved places yet",
     noSavedSubtitle: "Click the heart icon on any place card to bookmark for later.",
     exploreBtn: "Explore Attractions"
+    ,footerExploreTitle: "Explore Chonburi"
+    ,footerCategoriesTitle: "Featured Categories"
+    ,footerDistrictsTitle: "11 Districts of Chonburi"
+    ,footerAbout: "🏛️ History of Chonburi Province"
+    ,footerDistricts: "Explore 11 Districts"
+    ,footerMap: "Interactive Tourism Map"
+    ,footerPlanner: "Smart Trip Planner"
+    ,footerEat: "Eat & Drink (Restaurants / Cafes)"
+    ,footerHotels: "Hotels & Beach Resorts"
+    ,footerPhotos: "📸 Photo Spots"
+    ,footerDescription: "Discover Chonburi through stories, maps, attractions, cafes, restaurants, hotels, and trip planning across all 11 districts."
+    ,footerCopyright: "© 2026 CHONBURI — More Than The Sea. Designed with Modern Tourism + Local Discovery."
   }
 };

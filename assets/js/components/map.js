@@ -4,9 +4,14 @@ import { DISTRICTS } from '../data/districts.js';
 let mapInstance = null;
 let markersGroup = null;
 
-export function initInteractiveMap(containerId, filteredPlaces = PLACES, onSelectPlace) {
+export function initInteractiveMap(containerId, filteredPlaces = PLACES, onSelectPlace, lang = 'th') {
   const container = document.getElementById(containerId);
   if (!container) return;
+
+  if (!window.L) {
+    container.innerHTML = '<div class="h-full flex items-center justify-center p-6 text-center text-sm text-slate-600">ไม่สามารถโหลดแผนที่ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองใหม่</div>';
+    return;
+  }
 
   // Clear existing map instance if re-initializing
   if (mapInstance) {
@@ -32,10 +37,10 @@ export function initInteractiveMap(containerId, filteredPlaces = PLACES, onSelec
 
   markersGroup = L.layerGroup().addTo(mapInstance);
 
-  renderMapMarkers(filteredPlaces, onSelectPlace);
+  renderMapMarkers(filteredPlaces, onSelectPlace, lang);
 }
 
-export function renderMapMarkers(places, onSelectPlace) {
+export function renderMapMarkers(places, onSelectPlace, lang = 'th') {
   if (!mapInstance || !markersGroup) return;
 
   markersGroup.clearLayers();
@@ -45,7 +50,7 @@ export function renderMapMarkers(places, onSelectPlace) {
   const bounds = [];
 
   places.forEach(place => {
-    if (!place.lat || !place.lng) return;
+    if (typeof place.lat !== 'number' || typeof place.lng !== 'number') return;
 
     bounds.push([place.lat, place.lng]);
 
@@ -60,9 +65,11 @@ export function renderMapMarkers(places, onSelectPlace) {
     else if (place.category === 'photo') iconSymbol = '📸';
     else if (place.category === 'shopping') iconSymbol = '🛍️';
 
+    const isEn = lang === 'en' || document.documentElement.lang === 'en';
+    const placeName = isEn ? (place.nameEn || place.nameTh) : place.nameTh;
     const customIcon = L.divIcon({
       className: 'custom-leaflet-pin',
-      html: `<div class="custom-map-pin" title="${place.nameTh}">${iconSymbol}</div>`,
+      html: `<div class="custom-map-pin" title="${placeName}">${iconSymbol}</div>`,
       iconSize: [38, 38],
       iconAnchor: [19, 19]
     });
@@ -70,16 +77,16 @@ export function renderMapMarkers(places, onSelectPlace) {
     const marker = L.marker([place.lat, place.lng], { icon: customIcon });
 
     const districtObj = DISTRICTS.find(d => d.id === place.districtId);
-    const districtName = districtObj ? districtObj.nameTh : 'ชลบุรี';
+    const districtName = districtObj ? (isEn ? (districtObj.nameEn || 'Chonburi') : districtObj.nameTh) : (isEn ? 'Chonburi' : 'ชลบุรี');
 
     const popupHtml = `
       <div class="p-3 text-slate-800">
-        <img src="${place.cover}" alt="${place.nameTh}" class="w-full h-28 object-cover rounded-lg mb-2">
+        <img src="${place.cover}" alt="${placeName}" class="w-full h-28 object-cover rounded-lg mb-2">
         <div class="text-xs font-semibold text-[#00A8C6] mb-0.5">${districtName}</div>
-        <h4 class="font-bold text-sm text-[#172B3A] line-clamp-1">${place.nameTh}</h4>
-        <p class="text-xs text-slate-500 line-clamp-2 mt-1 mb-2">${place.shortDesc}</p>
+        <h4 class="font-bold text-sm text-[#172B3A] line-clamp-1">${placeName}</h4>
+        <p class="text-xs text-slate-500 line-clamp-2 mt-1 mb-2">${isEn ? (place.shortDescEn || place.shortDesc) : place.shortDesc}</p>
         <button id="map-popup-btn-${place.id}" class="w-full py-1.5 bg-[#006B9E] hover:bg-[#005680] text-white text-xs font-semibold rounded-lg transition-colors shadow-sm">
-          ดูรายละเอียด →
+          ${isEn ? 'View details' : 'ดูรายละเอียด'} →
         </button>
       </div>
     `;
