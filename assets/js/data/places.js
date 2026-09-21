@@ -1,6 +1,6 @@
 // places.js
 // Chon Buri Tourism Database (88 รายการ ครอบคลุม 11 อำเภอ)
-export const PLACES = [
+const ALL_PLACES = [
   {
     "id": "chonburi-muang-001",
     "nameTh": "หาดบางแสน",
@@ -128,6 +128,58 @@ export const PLACES = [
       "🏷️ พิพิธภัณฑ์/แหล่งเรียนรู้",
       "⭐ 4.9"
     ]
+  },
+  {
+    "id": "chonburi-muang-005-university",
+    "nameTh": "มหาวิทยาลัยบูรพา",
+    "nameEn": "Burapha University",
+    "districtId": "chonburi-muang",
+    "district": "เมืองชลบุรี",
+    "province": "ชลบุรี",
+    "category": "history",
+    "rawCategory": "สถานที่สำคัญ",
+    "subcategory": "มหาวิทยาลัย",
+    "address": "169 ถนนลงหาดบางแสน ตำบลแสนสุข อำเภอเมืองชลบุรี จังหวัดชลบุรี 20131",
+    "mapsUrl": "https://maps.app.goo.gl/U7RhtswVKCdxghet5",
+    "verified": true,
+    "rating": 4.7,
+    "reviewsCount": 0,
+    "cover": "https://images.unsplash.com/photo-1564981797816-1043664bf78d?auto=format&fit=crop&w=1000&q=80",
+    "shortDesc": "มหาวิทยาลัยริมทะเลบางแสน จังหวัดชลบุรี",
+    "fullDesc": "มหาวิทยาลัยบูรพา ตั้งอยู่ที่ตำบลแสนสุข อำเภอเมืองชลบุรี จังหวัดชลบุรี",
+    "openHours": "เปิดตามเวลาราชการ",
+    "entranceFee": "-",
+    "parking": "มีที่จอดรถ",
+    "accessibility": "รองรับการเดินทางทั่วไป",
+    "isTrending": false,
+    "isPhotoSpot": false,
+    "tags": ["📍 เมืองชลบุรี", "🏛️ มหาวิทยาลัย"]
+  },
+  {
+    "id": "chonburi-muang-009-khao-nang-nom",
+    "nameTh": "Khao Nang Nom",
+    "nameEn": "Khao Nang Nom",
+    "districtId": "chonburi-muang",
+    "district": "เมืองชลบุรี",
+    "province": "ชลบุรี",
+    "category": "photo",
+    "rawCategory": "จุดถ่ายรูป",
+    "subcategory": "จุดชมวิว",
+    "address": "เขานางนม ตำบลแสนสุข อำเภอเมืองชลบุรี จังหวัดชลบุรี",
+    "mapsUrl": "https://maps.app.goo.gl/2TmPb4kR6agqxMey9",
+    "verified": true,
+    "rating": 4.6,
+    "reviewsCount": 0,
+    "cover": "https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1000&q=80",
+    "shortDesc": "จุดชมวิวเขานางนม จังหวัดชลบุรี",
+    "fullDesc": "Khao Nang Nom เป็นจุดชมวิวในพื้นที่เมืองชลบุรี จังหวัดชลบุรี",
+    "openHours": "เปิดตามสถานที่",
+    "entranceFee": "-",
+    "parking": "โปรดตรวจสอบกับสถานที่",
+    "accessibility": "รองรับการเดินทางทั่วไป",
+    "isTrending": false,
+    "isPhotoSpot": true,
+    "tags": ["📍 เมืองชลบุรี", "📸 จุดชมวิว"]
   },
   {
     "id": "chonburi-muang-005",
@@ -2818,5 +2870,8 @@ export const PLACES = [
     ]
   }
 ];
+
+// Hide locations explicitly reported as closed from every app view.
+export const PLACES = ALL_PLACES.filter(place => place.id !== 'banbueng-016');
 export const places = PLACES;
 export default PLACES;

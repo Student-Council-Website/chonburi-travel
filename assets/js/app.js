@@ -1,5 +1,6 @@
 import { DISTRICTS } from './data/districts.js';
 import { PLACES } from './data/places.js';
+import { GOOGLE_MAPS_LINKS } from './data/googleMaps.js';
 import { i18n } from './data/i18n.js';
 import { createNavbar } from './components/navbar.js';
 import { createBottomNav } from './components/bottomNav.js';
@@ -770,6 +771,11 @@ function createMapView() {
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${t('mapSubtitle')}</p>
       </div>
 
+      <div class="rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-900/60 dark:bg-amber-950/30 p-3 text-xs leading-relaxed text-amber-900 dark:text-amber-100">
+        <span class="font-bold">${state.lang === 'en' ? 'Location note:' : 'หมายเหตุตำแหน่ง:'}</span>
+        ${state.lang === 'en' ? 'The compass markers are district reference points. Open a place in Google Maps to see its verified location.' : 'หมุดรูปเข็มทิศเป็นจุดอ้างอิงระดับอำเภอ ให้เปิดสถานที่ใน Google Maps เพื่อดูตำแหน่งที่ยืนยันแล้ว'}
+      </div>
+
       <!-- Quick Search input -->
       <div>
         <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">${t('quickSearchPlaceholder')}</label>
@@ -987,7 +993,7 @@ function createPlaceDetailView(placeId) {
           
           <div id="place-mini-map" class="w-full h-44 rounded-xl overflow-hidden border border-slate-100 dark:border-slate-700"></div>
 
-          <a href="${place.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}`}" target="_blank" class="w-full py-3 bg-[#006B9E] hover:bg-[#005680] text-white text-xs font-bold rounded-xl shadow-md flex items-center justify-center gap-2 transition-all">
+          <a href="${GOOGLE_MAPS_LINKS[place.id] || place.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${place.nameTh}, ชลบุรี`)}`}" target="_blank" rel="noopener noreferrer" class="w-full py-3 bg-[#006B9E] hover:bg-[#005680] text-white text-xs font-bold rounded-xl shadow-md flex items-center justify-center gap-2 transition-all">
             <i data-lucide="navigation" class="w-4 h-4"></i> ${t('placeOpenGoogleMaps')}
           </a>
         </div>
